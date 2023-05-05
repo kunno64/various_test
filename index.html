@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Google Calendar API Example</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+      var CLIENT_ID = "662947450850-juj0pr9grtrjtcddn9q5vj5dbrc4pu3i.apps.googleusercontent.com";
+      var API_KEY = "AIzaSyAXzIP-0J6cxmbhhkYt_WBOyve3OnWQFT8";
+      var SCOPES = "https://www.googleapis.com/auth/calendar";
+
+      function handleClientLoad() {
+        gapi.load("client:auth2", initClient);
+      }
+
+      function initClient() {
+        gapi.client
+          .init({
+            apiKey: API_KEY,
+            clientId: CLIENT_ID,
+            discoveryDocs: [
+              "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
+            ],
+            scope: SCOPES,
+          })
+          .then(
+            function () {
+              gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+              updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+            },
+            function (error) {
+              console.error(JSON.stringify(error, null, 2));
+            }
+          );
+      }
+
+      function updateSigninStatus(isSignedIn) {
+        if (isSignedIn) {
+          createEvent();
+        } else {
+          gapi.auth2.getAuthInstance().signIn();
+        }
+      }
+
+      function createEvent() {
+        var event = {
+          summary: "Sample Event",
+          location: "123 Main St, Anytown, USA",
+          description: "A sample event for demonstration purposes.",
+          start: {
+            dateTime: "2023-05-10T10:00:00-07:00",
+            timeZone: "America/Los_Angeles",
+          },
+          end: {
+            dateTime: "2023-05-10T12:00:00-07:00",
+            timeZone: "America/Los_Angeles",
+          },
+          attendees: [
+            { email: "attendee1@example.com" },
+            { email: "attendee2@example.com" },
+          ],
+          reminders: {
+            useDefault: false,
+            overrides: [
+              { method: "email", minutes: 24 * 60 },
+              { method: "popup", minutes: 10 },
+            ],
+          },
+        };
+
+        var request = gapi.client.calendar.events.insert({
+          calendarId: "1b112b48337ae63de8bfa98217f112e74464d0187fe9ed54ff0b6c93c4e5f5cc@group.calendar.google.com",
+          resource: event,
+        });
+
+        request.execute(function (event) {
+          console.log("Event created:", event.htmlLink);
+        });
+      }
+    </script>
+  </head>
+  <body onload="handleClientLoad()">
+    <h1>Google Calendar API Example</h1>
+  </body>
+</html>

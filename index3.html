@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Google Calendar API Example</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+      const apiKey = "AIzaSyCdh7BWy3lQdGMJeShU-fR-jnUF8FsgyPc";
+      const calendarId = "1b112b48337ae63de8bfa98217f112e74464d0187fe9ed54ff0b6c93c4e5f5cc@group.calendar.google.com";
+
+      function handleClientLoad() {
+        gapi.load("client", initClient);
+      }
+
+      function initClient() {
+        gapi.client.init({
+          apiKey: apiKey,
+          discoveryDocs: [
+            "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
+          ],
+        });
+      }
+
+      function createEvent() {
+        var event = {
+          summary: "Sample Event",
+          location: "123 Main St, Anytown, USA",
+          description: "A sample event for demonstration purposes.",
+          start: {
+            dateTime: "2023-05-10T10:00:00-07:00",
+            timeZone: "America/Los_Angeles",
+          },
+          end: {
+            dateTime: "2023-05-10T12:00:00-07:00",
+            timeZone: "America/Los_Angeles",
+          },
+          attendees: [
+            { email: "attendee1@example.com" },
+            { email: "attendee2@example.com" },
+          ],
+          reminders: {
+            useDefault: false,
+            overrides: [
+              { method: "email", minutes: 24 * 60 },
+              { method: "popup", minutes: 10 },
+            ],
+          },
+        };
+
+        var request = gapi.client.calendar.events.insert({
+          calendarId: calendarId,
+          resource: event,
+        });
+
+        request.execute(function (event) {
+          console.log("Event created:", event.htmlLink);
+          document.getElementById("result").innerHTML =
+            "イベントが作成されました：" + event.htmlLink;
+        });
+      }
+    </script>
+  </head>
+  <body onload="handleClientLoad()">
+    <h1>Google Calendar API Example</h1>
+    <button onclick="createEvent()">Create Event</button>
+    <div id="result"></div>
+  </body>
+</html>
