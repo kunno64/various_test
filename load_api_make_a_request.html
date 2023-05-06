@@ -1,8 +1,31 @@
+<!-- 
+    2023/05/06
+    GooGle APIの使い方を公式ドキュメントにしたがって試行してみようと思ったが、APIキーを
+    うける時の設定がうまくいかない。任意の人に公開するという設定が簡単ではなく、手軽には使いづらい感じであった。
+    以下のコードもまだうまく動いていない。
+-->
+
+
 <html>
   <head>
     <script src="https://apis.google.com/js/api.js"></script>
     <script>
+      let timeout;
+
+      function updateResults(originalText, translatedText) {
+        clearTimeout(timeout);
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = `<p>Original text: ${originalText}</p><p>Translated text: ${translatedText}</p>`;
+      }
+
       function start() {
+        const originalText = 'hello world';
+
+        // Show a message if the API takes too long to respond.
+        timeout = setTimeout(function() {
+          updateResults(originalText, 'Translation is taking too long, please try again later.');
+        }, 5000); // 5 seconds
+
         // Initializes the client with the API key and the Translate API.
         gapi.client.init({
           'apiKey': 'AIzaSyBhqQI5xdSCeuhoudxcWsu9H8dphaMKDt4',
@@ -11,14 +34,18 @@
           // Executes an API request, and returns a Promise.
           // The method name `language.translations.list` comes from the API discovery.
           return gapi.client.language.translations.list({
-            q: 'hello world',
+            q: originalText,
             source: 'en',
             target: 'de',
           });
         }).then(function(response) {
-          console.log(response.result.data.translations[0].translatedText);
+          const translatedText = response.result.translations[0].translatedText;
+          console.log(translatedText);
+          updateResults(originalText, translatedText);
         }, function(reason) {
+          clearTimeout(timeout);
           console.log('Error: ' + reason.result.error.message);
+          updateResults('Error: ' + reason.result.error.message);
         });
       };
 
